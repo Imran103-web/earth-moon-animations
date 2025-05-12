@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script type="text/javascript" src="https://getfirebug.com/firebug-lite-debug.js"></script>
+  <meta name="description" content="CS4406 Computer Graphics - Earth and Moon Animation" />
+  <meta charset="utf-8" />
+  <title>Earth and Moon Animation - Unit 6</title>
+  <style>
+    #container {
+      background: #ffffff;
+      width: 600%;
+      height: 600%;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+<script src="https://threejs.org/build/three.js"></script>
+<script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/OrbitControls.js"></script>
+
+<script type="text/javascript">
+
+  // Set the dimensions of the rendering window
+  var WIDTH = 600, HEIGHT = 400;
+
+  // Camera attributes
+  var VIEW_ANGLE = 20, ASPECT = WIDTH / HEIGHT, NEAR = 1, FAR = 1000;
+
+  // Get the DOM element to attach to
+  var $container = $('#container');
+
+  // Create a WebGL renderer with antialiasing
+  var renderer = new THREE.WebGLRenderer({ antialias: true });
+
+  // Create a new Three.js scene
+  var scene = new THREE.Scene();
+  var clock = new THREE.Clock();
+
+  // Set up a perspective camera
+  var camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+  camera.position.z = 600;
+  scene.add(camera);
+
+  // Add orbit controls (disabled)
+  var cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
+  cameraControls.enabled = false;
+
+  // Start the renderer
+  renderer.setSize(WIDTH, HEIGHT);
+
+  // Append the rendering output to the DOM
+  $container.append(renderer.domElement);
+
+  // Create ambient light for global illumination
+  var ambientLight = new THREE.AmbientLight(0x888888);
+  scene.add(ambientLight);
+
+  // Add directional light to simulate the sun
+  var light = new THREE.DirectionalLight(0xffffff, 1);
+  light.position.set(100, 0, 80);
+  scene.add(light);
+
+  // Earth: Create geometry and material
+  var earthGeometry = new THREE.SphereGeometry(60, 60, 60);
+  var earthMaterial = new THREE.MeshPhongMaterial({
+    map: new THREE.TextureLoader().load("https://upload.wikimedia.org/wikipedia/commons/c/cf/WorldMap-A_non-Frame.png"),
+    specular: 0x333333,
+    shininess: 20
+  });
+  var earth = new THREE.Mesh(earthGeometry, earthMaterial);
+  scene.add(earth);
+
+  // Moon: Create geometry and material
+  var moonGeometry = new THREE.SphereGeometry(30, 50, 50);
+  var moonMaterial = new THREE.MeshPhongMaterial({
+    map: new THREE.TextureLoader().load("https://upload.wikimedia.org/wikipedia/commons/d/db/Moonmap_from_clementine_data.png"),
+    specular: 0x333333,
+    shininess: 10
+  });
+  var moon = new THREE.Mesh(moonGeometry, moonMaterial);
+  moon.position.x = 100;
+  scene.add(moon);
+
+  var r = 100, theta = 1, dTheta = .3 * Math.PI / 100;
+
+  // Animation loop to rotate earth and moon
+  function animate() {
+    requestAnimationFrame(animate);
+    render();
+  }
+
+  // Render function for updating positions
+  function render() {
+    earth.rotation.y += 0.01; // Slow rotation for Earth
+    moon.rotation.y -= 0.02; // Faster rotation for Moon
+
+    // Moon's orbit around Earth
+    theta -= dTheta;
+    moon.position.x = r * Math.cos(theta);
+    moon.position.z = r * Math.sin(theta);
+
+    // Render the scene
+    renderer.render(scene, camera);
+  }
+
+  // Start the animation
+  animate();
+
+</script>
+
+</html>
